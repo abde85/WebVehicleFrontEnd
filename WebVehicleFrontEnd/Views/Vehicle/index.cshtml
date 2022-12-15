@@ -1,0 +1,149 @@
+﻿@{
+    ViewBag.Title = "Input Data Vehicle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .block {
+      display: block;
+      width: 100%;
+    }
+    .input-group-append {
+      cursor: pointer;
+    }
+</style>
+
+<form id="Form">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="txtAgreementNumber" class="form-label fw-bold">Agreement Number</label>
+                        <input id="txtAgreementNumber" name="agreementNumber" class="form-control" placeholder="Input Agreement Number" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtBrandId" class="form-label fw-bold">Branch Id</label>
+                        <input id="txtBrandId" name="branchId" class="form-control" placeholder="Input Branch Id" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtBpkbNumber" class="form-label fw-bold">No. BPKB</label>
+                        <input id="txtBpkbNumber" name="bpkbNumber" class="form-control" placeholder="Input No. BPKB" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="dtpBpkbDateIn" class="form-label fw-bold">Tanggal BPKB In</label>
+                        <div class="input-group date mb-3">
+                            <input type="text" id="dtpBpkbDateIn" name="bpkbDateIn" class="form-control" placeholder="mm/dd/yyyy" />
+                            <span class="input-group-append input-group-text">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dtpBpkbDate" class="form-label fw-bold">Tanggal BPKB</label>
+                        <div class="input-group date mb-3">
+                            <input type="text" id="dtpBpkbDate" name="bpkbDate" class="form-control" placeholder="mm/dd/yyyy" />
+                            <span class="input-group-append input-group-text">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtFakturNumber" class="form-label fw-bold">No. Faktur</label>
+                        <input id="txtFakturNumber" name="fakturNumber" class="form-control" placeholder="Input No. Faktur" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tanggal Faktur</label>
+                        <div class="input-group date mb-3">
+                            <input id="dtpFakturDate" name="fakturDate" type="text" class="form-control" placeholder="mm/dd/yyyy">
+                            <span class="input-group-append input-group-text">
+                                 <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtPoliceNo" class="form-label fw-bold">Nomor Polisi</label>
+                        <input id="txtPoliceNo" name="policeNo" class="form-control" placeholder="Input Nomor Polisi" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtLocation" class="form-label fw-bold">Lokasi Penyimpanan</label>
+                        <select id="txtLocation" name="location" class="form-select">
+                            <option value="" disabled selected>Select Lokasi Penyimpanan</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pt-3">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <button onclick="ClearData()" type="button" id="btnCancel" class="btn btn-warning block">Cancel</button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <button onclick="SaveData()" type="button" id="btnSave" class="btn btn-warning block">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            GetAllLocations();
+        });
+
+        $(function(){
+            $('.date').datepicker({
+                format: 'mm/dd/yyyy'
+            });
+        });
+
+        function GetAllLocations() {
+            var select = document.getElementById('txtLocation');
+
+            $.getJSON("/StorageLocation", function(storageLocations) {
+                $.map(storageLocations, function(storageLocation) {
+                    var option = document.createElement("OPTION");
+                    var txt = document.createTextNode(storageLocation.locationName);
+                     option.appendChild(txt);
+                     option.setAttribute("value", storageLocation.locationId);
+                     select.insertBefore(option,select.lastChild);
+                });
+            });
+        }
+        
+        function SaveData() {
+            var bpkb = {
+                Agreement_Number: $("#txtAgreementNumber").val(),
+                Bpkb_No: $("#txtBpkbNumber").val(),
+                Branch_Id: $("#txtBrandId").val(),
+                Bpkb_Date: $("#dtpBpkbDate").val(),
+                Faktur_No: $("#txtFakturNumber").val(),
+                Faktur_Date: $("#dtpFakturDate").val(),
+                Location_Id: $("#txtLocation").val(),
+                Police_No: $("#txtPoliceNo").val(),
+                Bpkb_Date_In: $("#dtpBpkbDateIn").val()
+            };
+
+            $.post("/Vehicle/SaveVehicle", bpkb)
+                .done(function(data) {
+                    if (data.success) {
+                        alert(data.successMessage);
+                        ClearData();
+                    } else {
+                        alert(data.errorMessage);
+                    }
+                });
+        }
+
+        function ClearData() {
+            document.getElementById("Form").reset();
+        }
+    </script>
+}
